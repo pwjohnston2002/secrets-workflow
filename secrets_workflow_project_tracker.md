@@ -97,6 +97,12 @@ This repository is a foundational dependency for the `workflow-toolbelt`. The in
     - **Secret Usage:** Log when `sops` decryption occurs.
 - **Log Aggregation:** For demonstration purposes, logs will be output to the CI console and stored as job artifacts. In a real-world scenario, these would be shipped to a central logging platform (e.g., Splunk, Datadog).
 
+### 4.1.3 Secure Instance Access
+- **Primary Access Method:** The default pattern for accessing compute instances (e.g., for debugging or interactive sessions) will be through managed, keyless services. This avoids exposing SSH ports and eliminates the need for static SSH keys.
+    - **AWS Implementation:** AWS Systems Manager (SSM) Session Manager will be the primary tool. It provides a secure, auditable shell and port-forwarding capabilities without opening port 22.
+    - **Cloud-Agnostic Principle:** The equivalent services for other clouds are GCP's IAP TCP Forwarding and Azure Bastion.
+- **Future Advanced Patterns (Out of Scope for MVP):** For advanced use cases requiring native SSH tooling (e.g., complex Ansible playbooks, specific IDE integrations), a future phase may explore **ephemeral SSH certificates**. This would involve an automated Certificate Authority (CA) signing short-lived certificates for authenticated users, still avoiding long-lived static keys.
+
 ### 4.2 Data Flow
 1.  **Trigger Pipeline:** A CI/CD pipeline (e.g., GitHub Actions) is triggered.
 2.  **Ephemeral Authentication:** The CI runner uses OIDC federation to obtain short-lived cloud credentials directly from the cloud provider (e.g., AWS STS). No static credentials are stored.
@@ -132,6 +138,7 @@ This repository is a foundational dependency for the `workflow-toolbelt`. The in
 - [ ] **Integrate reusable workflows** (`workflow_call`) for ephemeral Terraform init/plan/apply/destroy into the Workflow Toolbelt.
 - [ ] Add **dynamic secret injection via runtime generation and sops decryption** into CI/CD pipelines.
 - [ ] Set up **least-privilege IAM roles** for OIDC federation, scoped to ephemeral operations.
+- [ ] **Implement and document secure instance access** using AWS SSM Session Manager.
 - [ ] Document usage patterns for developers for consuming ephemeral patterns.
 - [ ] **Implement Observability:** Add logging for OIDC session IDs and MinIO access to CI workflows.
 - [ ] Integrate **policy-as-code tools** (`checkov`, `tfsec`) into CI workflows.
@@ -144,6 +151,7 @@ This repository is a foundational dependency for the `workflow-toolbelt`. The in
 - [ ] **Evolve Key Management:**
     - [ ] Propose and document advanced `age` key management strategies (e.g., bootstrapping with OIDC-signed secrets).
     - [ ] Explore using a cloud KMS to encrypt/decrypt the `age` private key, removing the need to share it directly.
+- [ ] **Explore advanced access patterns** with ephemeral SSH certificates for native SSH/Ansible workflows.
 
 ---
 
