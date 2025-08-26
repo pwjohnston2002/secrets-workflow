@@ -9,6 +9,7 @@ The core principle of this repository is **"no long-lived infrastructure."** We 
 This approach ensures:
 - **Zero Cost When Idle:** No cloud resources are left running after a CI/CD pipeline or local test completes.
 - **Enhanced Security:** We rely on short-lived credentials (via OIDC) and in-repo encrypted files (`sops+age`), minimizing the attack surface.
+- **Enhanced Security:** We rely on short-lived credentials (via OIDC), in-repo encrypted files (`sops+age`), and managed, keyless instance access to further minimize the attack surface.
 - **Cloud-Agnosticism:** The patterns are designed to be portable across AWS, GCP, and Azure.
 - **Reproducibility:** Every environment is built from code and torn down completely, guaranteeing consistency.
 
