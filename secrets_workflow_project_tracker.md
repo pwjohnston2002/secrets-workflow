@@ -68,6 +68,33 @@ This repository is a foundational dependency for the `workflow-toolbelt`. The in
 - **Cross-Repo Milestone:** Phase 1 of this project is a direct dependency for starting Phase 2 of the `workflow-toolbelt` project.
 - **Shared Principles:** The `pre-commit` hooks and security scanning tools (`gitleaks`, `tfsec`, `checkov`) defined here will become the standard enforced by the `workflow-toolbelt`'s CI templates.
 
+### Concrete Integration Artifacts and Contracts
+
+- **Reusable CI workflows to publish from this repo:**
+  - `.github/workflows/terraform-ephemeral.yml` (reusable via `workflow_call`): OIDC auth, ephemeral MinIO state, `sops+age`, `fmt/validate/plan/apply/destroy` with teardown guarantees.
+  - `.github/workflows/security-scans.yml` (reusable): Runs `gitleaks`, and at least one IaC policy tool (`tfsec` and/or `checkov`).
+- **Composite actions (optional but recommended):**
+  - `actions/setup-sops-age`: Install and validate `sops` + `age`.
+  - `actions/setup-minio`: Configure ephemeral S3-compatible backend service for Terraform with health checks.
+- **Thin wrappers in `workflow-toolbelt`:**
+  - `.github/workflows/terraform.yml`: Calls this repo’s `terraform-ephemeral.yml` with project-specific inputs (e.g., `tf_dir`, `apply`, `destroy_on_complete`).
+  - `.github/workflows/security.yml`: Calls this repo’s `security-scans.yml`.
+- **Import pattern (example):**
+  ```yaml
+  jobs:
+    tf_ephemeral:
+      uses: <owner>/secrets-workflow/.github/workflows/terraform-ephemeral.yml@v0.1.0
+      with:
+        tf_dir: ./tests/terraform/valid
+        cloud: aws
+        apply: false
+        destroy_on_complete: true
+      secrets:
+        AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
+        AWS_REGION: ${{ secrets.AWS_REGION }}
+  ```
+- **Version pinning:** Toolbelt must pin to a semver tag (e.g., `@v0.1.0`) to ensure stable CI behavior.
+
 ---
 
 ## 4. Proposed Architecture
@@ -155,6 +182,38 @@ This repository is a foundational dependency for the `workflow-toolbelt`. The in
     - [ ] Explore using a cloud KMS to encrypt/decrypt the `age` private key, removing the need to share it directly.
 - [ ] **Explore advanced access patterns** with ephemeral SSH certificates for native SSH/Ansible workflows.
 
+### 4.2 Reusable Workflow Contracts
+
+#### `.github/workflows/terraform-ephemeral.yml`
+- **Purpose:** Provide ephemeral Terraform execution with no persistent state or credentials.
+- **Inputs (with sensible defaults):**
+  - `tf_dir` (string, required): Path to Terraform root module.
+  - `cloud` (enum: `aws`|`gcp`|`azure`, default `aws`).
+  - `apply` (bool, default `false`): Execute `terraform apply`.
+  - `destroy_on_complete` (bool, default `true` for PRs): Guarantee teardown.
+  - `terraform_version` (string, optional): TF version to install.
+- **Secrets:**
+  - AWS: `AWS_ROLE_ARN`, `AWS_REGION` (GCP/Azure placeholders documented until implemented).
+- **Behavior:**
+  - Configure OIDC → cloud STS for short-lived credentials.
+  - Start ephemeral MinIO (S3-compatible) as backend; or use local backend with encrypted artifact handoff.
+  - Install `sops` + `age`; decrypt files as needed.
+  - Run `fmt`, `validate`, `plan`, conditional `apply`, and conditional `destroy` with strict failure on residual resources.
+- **Outputs:**
+  - `tf_plan_path` (optional): Path or artifact name for plan.
+  - `applied` (bool): Whether apply executed.
+  - `destroyed` (bool): Whether destroy executed.
+
+#### `.github/workflows/security-scans.yml`
+- **Purpose:** Centralize security scans for consumers.
+- **Inputs:**
+  - `paths` (string, optional): Path filter for scans.
+  - `severity_threshold` (string, optional): Fail gate configuration.
+- **Behavior:**
+- Run `gitleaks` on repo.
+- Run at least one IaC policy tool (`tfsec` and/or `checkov`).
+- Emit SARIF where applicable for code scanning integration.
+
 ---
 
 ## 6. Deliverables
@@ -165,6 +224,12 @@ This repository is a foundational dependency for the `workflow-toolbelt`. The in
     - **Developer Onboarding Runbooks** (e.g., `docs/runbooks/local_dev_setup.md`).
     - **Principles & Guides** (e.g., `PRINCIPLES.md`, `ephemeral_state.md`, `secrets_with_sops.md`).
     - **Architectural Decision Records (ADRs)** for key design choices.
+
+### Deliverables Addendum (for Toolbelt Integration)
+- `.github/workflows/terraform-ephemeral.yml` and `.github/workflows/security-scans.yml` published and tagged (e.g., `v0.1.0`).
+- `actions/setup-sops-age` and `actions/setup-minio` composite actions (optional) to reduce duplication.
+- `examples/` demonstrating how to call reusable workflows and expected inputs/outputs.
+- Minimal `modules/` for IAM OIDC role(s) and ephemeral MinIO configuration with examples and sample policies.
 
 ---
 
@@ -177,6 +242,17 @@ This repository is a foundational dependency for the `workflow-toolbelt`. The in
 | **Incomplete resource teardown** | High | Comprehensive `terraform destroy` in CI, Terratest assertions for zero remaining resources. |
 | **Developer onboarding friction** | Medium | Provide clear documentation, examples, and pre-configured templates. |
 | **Complexity of ephemeral patterns** | Medium | Start with minimal patterns, iterative expansion, focus on clear examples. |
+
+### Additional Risks
+- **Version Drift Between Repos:**
+  - Impact: Medium — Breakages if consumers track `main`.
+  - Mitigation: Enforce semver tags; document breaking changes; pin `workflow_call` to tags.
+- **Insufficient Teardown on Failure Paths:**
+  - Impact: High — Stranded resources and costs.
+  - Mitigation: Always-on `destroy_on_complete` for PRs; add Terratest assertions for zero residual resources; CI post-step cleanup.
+- **Composite Action Maintenance Overhead:**
+  - Impact: Low/Medium — Duplication risk across repos.
+  - Mitigation: Centralize in this repo; version and test with canary jobs.
 
 ---
 
@@ -195,6 +271,12 @@ This repository is a foundational dependency for the `workflow-toolbelt`. The in
 - **Observability:** Full audit trails for all ephemeral sessions and secret access events.
 - **Cost-Efficiency:** Zero cloud costs when projects are not actively running.
 
+## 9.5 Acceptance Criteria: Toolbelt Import Success
+- Toolbelt runs a thin `terraform.yml` wrapper that successfully calls `terraform-ephemeral.yml` against `tests/terraform/valid` with OIDC-backed auth and no static credentials.
+- Security workflow in toolbelt (`security.yml`) calls `security-scans.yml` and reports results (optionally SARIF).
+- Runs create no persistent resources or state; MinIO/service state is ephemeral; `destroy_on_complete` defaults to true for PRs.
+- Toolbelt pins to a semver tag (e.g., `@v0.1.0`) for deterministic CI behavior.
+
 ---
 
 ## 10. Open Questions
@@ -208,10 +290,28 @@ This repository is a foundational dependency for the `workflow-toolbelt`. The in
 
 ## 11. Next Steps
 - Finalize the core ephemeral patterns (OIDC, MinIO-in-CI, sops+age).
-- Create initial repository scaffold for `secrets_workflow`.
-- Implement initial reusable CI workflows for ephemeral Terraform apply/destroy.
-- Integrate with Workflow Toolbelt by consuming the new reusable workflows.
-- Review security and compliance requirements with stakeholders.
+- Implement the following reusable CI workflows in this repo:
+  - `.github/workflows/terraform-ephemeral.yml` (with inputs/outputs above).
+  - `.github/workflows/security-scans.yml`.
+- (Optional) Implement composite actions:
+  - `actions/setup-sops-age` and `actions/setup-minio`.
+- Add minimal `modules/` and `examples/` to prove OIDC + MinIO patterns.
+- Tag the repo `v0.1.0` and document inputs/outputs and migration notes.
+- In `workflow-toolbelt`, add thin wrappers:
+  - `.github/workflows/terraform.yml` calling `@v0.1.0` with `tf_dir: ./tests/terraform/valid`.
+  - `.github/workflows/security.yml` calling `@v0.1.0`.
+- Smoke test in a sandbox account using OIDC role with least-privilege trust policy.
+- Iterate to add GCP/Azure examples and Terratest-based teardown checks.
+
+## Versioning and Import Strategy
+- Use semantic versioning and release tags; avoid consuming from `main`.
+- Maintain a CHANGELOG and document any breaking contract changes to reusable workflows and actions.
+- Provide deprecation windows and clear upgrade notes for inputs/outputs.
+
+## IAM and Secrets Requirements
+- **AWS:** Configure GitHub OIDC trust with least-privilege `AssumeRole` policy constrained by `aud`, `sub` (repo/ref), and session duration. Provide `AWS_ROLE_ARN` and `AWS_REGION` as GitHub secrets.
+- **GCP/Azure:** Document workload identity setup and expected inputs; implement examples in follow-on phases.
+- Avoid long-lived keys; prefer job-scoped environment variables and short-lived credentials only.
 
 ---
 
