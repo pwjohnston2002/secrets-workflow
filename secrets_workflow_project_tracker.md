@@ -128,17 +128,19 @@ This repository is a foundational dependency for the `workflow-toolbelt`. The in
 - [ ] **Establish `sops+age` for encrypting static configuration examples** and demonstrating in-repo secret management.
 - [ ] **Define patterns for Terraform `local` backend and MinIO-in-CI** for ephemeral state management.
 - [ ] **Create runbook for local development setup** (`docs/runbooks/local_dev_setup.md`) covering `aws-vault` and `sops+age` key access.
+- [ ] **Create runbook for secure instance access** (`docs/runbooks/instance_access.md`) covering SSM usage (shell, port-forwarding, logging).
 - [ ] Create initial `PRINCIPLES.md` outlining the "no long-lived infra" philosophy.
 
 ### Phase 1.5 — Validation & Testing
 - [ ] Implement **Terratest examples** demonstrating create→assert→destroy patterns for ephemeral infrastructure.
 - [ ] Build a **test harness** for validating that the `destroy` step leaves zero cloud resources.
+- [ ] **Add Terratest for SSM reachability** to assert that `start-session` can connect to a provisioned instance.
 
 ### Phase 2 — Workflow Integration & Hardening
 - [ ] **Integrate reusable workflows** (`workflow_call`) for ephemeral Terraform init/plan/apply/destroy into the Workflow Toolbelt.
 - [ ] Add **dynamic secret injection via runtime generation and sops decryption** into CI/CD pipelines.
 - [ ] Set up **least-privilege IAM roles** for OIDC federation, scoped to ephemeral operations.
-- [ ] **Implement and document secure instance access** using AWS SSM Session Manager.
+- [ ] **Create a reusable Terraform module for secure instance access** (`modules/instance_access_ssm`) that configures an instance profile for SSM and security groups (no port 22).
 - [ ] Document usage patterns for developers for consuming ephemeral patterns.
 - [ ] **Implement Observability:** Add logging for OIDC session IDs and MinIO access to CI workflows.
 - [ ] Integrate **policy-as-code tools** (`checkov`, `tfsec`) into CI workflows.
