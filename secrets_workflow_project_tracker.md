@@ -24,12 +24,12 @@
 
 ### Context Engineering Completeness Check
 
-- [ ] **User Persona Definition**: Complete profile with expertise level, goals, constraints (Self: SRE/DevSecOps, Portfolio Builder, Cost-Conscious)
-- [ ] **Domain Context Loaded**: Ephemeral infrastructure, CI/CD security, Terraform, OIDC, sops/age
-- [ ] **Tool/Resource Context**: GitHub Actions, AWS/GCP/Azure OIDC, MinIO, sops, age, Terratest, Checkov, tfsec, Gitleaks
-- [ ] **Historical Context**: Previous discussions on "no long-lived infra," "ephemeral creds," and the need for a foundational repo (`secrets.md`)
-- [ ] **Edge Case Documentation**: Handling local dev with ephemeral patterns, sops key management, cross-cloud OIDC setup
-- [ ] **Success Pattern Recognition**: OIDC for auth, MinIO for ephemeral state, sops for encrypted config, reusable workflows for consumption
+- [X] **User Persona Definition**: Complete profile with expertise level, goals, constraints (Self: SRE/DevSecOps, Portfolio Builder, Cost-Conscious)
+- [X] **Domain Context Loaded**: Ephemeral infrastructure, CI/CD security, Terraform, OIDC, sops/age
+- [X] **Tool/Resource Context**: GitHub Actions, AWS/GCP/Azure OIDC, MinIO, sops, age, Terratest, Checkov, tfsec, Gitleaks
+- [X] **Historical Context**: Previous discussions on "no long-lived infra," "ephemeral creds," and the need for a foundational repo (`secrets.md`)
+- [X] **Edge Case Documentation**: Handling local dev with ephemeral patterns, sops key management, cross-cloud OIDC setup
+- [X] **Success Pattern Recognition**: OIDC for auth, MinIO for ephemeral state, sops for encrypted config, reusable workflows for consumption
 
 ---
 
