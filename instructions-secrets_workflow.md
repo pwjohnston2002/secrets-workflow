@@ -4,9 +4,14 @@
 Consult here first before interpreting other files.
 When in doubt, AI should reread this file before interpreting repo contents.
 
+📎 **Repo Root:** [Secrets Workflow on GitHub](https://github.com/pwjohnston2002/secrets-workflow)  
+This link provides access to the full repository (README, workflows, modules, and docs).  
+Use this as the entry point when scanning or reviewing the repo as a whole.
+
 ---
 
 ## 1. Project Overview
+
 
 **Project Name:** Secrets Workflow
 **Mission Statement:** Provide a secure, ephemeral-first secrets and state management library that integrates with the Workflow Toolbelt and all dependent portfolio projects.
@@ -69,6 +74,7 @@ When in doubt, AI should reread this file before interpreting repo contents.
 * Documentation updated (`README`, runbooks, principles).
 * Project tracker updated.
 * Tagged release (semver) published.
+* [`secrets_workflow_project_tracker.md`]( https://github.com/pwjohnston2002/secrets-workflow/blob/main/secrets_workflow_project_tracker.md ) updated to reflect progress (authoritative task-level detail). #will update link when project repo is public, not yet.
 
 ---
 
