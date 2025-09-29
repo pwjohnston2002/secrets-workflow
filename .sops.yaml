@@ -1,0 +1,5 @@
+creation_rules:
+  - path_regex: \.tfvars$
+    age:
+      # public key: age15sz46c0sm2ql5vcjg9dqmv70st9cg3dy72kgv20l2aa8l2uv0dgqkt6ymv
+      - "age15sz46c0sm2ql5vcjg9dqmv70st9cg3dy72kgv20l2aa8l2uv0dgqkt6ymv"
