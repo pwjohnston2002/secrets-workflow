@@ -152,9 +152,9 @@ This repository is a foundational dependency for the `workflow-toolbelt`. The in
 
 ### Phase 1 — Foundational Patterns (MVP)
 - [ ] **Implement OIDC federation for CI/CD authentication** (e.g., GitHub Actions to AWS STS).
-- [ ] **Establish `sops+age` for encrypting static configuration examples** and demonstrating in-repo secret management.
+- [X] **Establish `sops+age` for encrypting static configuration examples** and demonstrating in-repo secret management.
 - [ ] **Define patterns for Terraform `local` backend and MinIO-in-CI** for ephemeral state management.
-- [ ] **Create runbook for local development setup** (`docs/runbooks/local_dev_setup.md`) covering `aws-vault` and `sops+age` key access.
+- [X] **Create runbook for local development setup** (`docs/runbooks/local_dev_setup.md`) covering `aws-vault` and `sops+age` key access.
 - [ ] **Create runbook for secure instance access** (`docs/runbooks/instance_access.md`) covering SSM usage (shell, port-forwarding, logging).
 - [ ] Create initial `PRINCIPLES.md` outlining the "no long-lived infra" philosophy.
 
