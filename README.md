@@ -17,6 +17,8 @@ This approach ensures:
 - **Reusable GitHub Actions Workflows:** For ephemeral Terraform execution (`init/plan/apply/destroy`), security scanning, and more.
 - **Reference Implementations:** Code examples for OIDC federation, MinIO-in-CI for state, and `sops+age` for secrets.
 - **Documentation & Runbooks:** Clear guides on principles, local development setup, and architectural decisions.
+  - Local Development Setup: How to configure your local machine with `sops`, `age`, and `aws-vault`.
+  - OIDC Federation with AWS: How to set up and use passwordless authentication from GitHub Actions to AWS.
 - **Terraform Modules:** For common ephemeral patterns.
 
 ## Future Vision: From CI/CD to AI-Driven GitOps
