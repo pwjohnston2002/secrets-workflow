@@ -1,0 +1,62 @@
+# .github/workflows/terraform-ephemeral.yml
+
+name: Reusable Ephemeral Terraform Workflow
+
+on:
+  workflow_call:
+    inputs:
+      tf_dir:
+        description: "Path to the Terraform root module."
+        type: string
+        required: true
+      apply:
+        description: "Set to 'true' to execute terraform apply."
+        type: boolean
+        default: false
+      destroy_on_complete:
+        description: "Set to 'true' to guarantee teardown."
+        type: boolean
+        default: true
+    secrets:
+      AWS_ROLE_TO_ASSUME:
+        description: "The ARN of the IAM role to assume via OIDC."
+        required: true
+      AWS_REGION:
+        description: "The AWS region to operate in."
+        required: true
+
+jobs:
+  terraform:
+    name: Terraform Ephemeral Run
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # Required for requesting the OIDC token
+      contents: read   # Required for checking out the repository
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init, Plan, and Apply
+        working-directory: ${{ inputs.tf_dir }}
+        run: |
+          terraform init
+          terraform plan -out=tfplan
+          if [ "${{ inputs.apply }}" == "true" ]; then
+            terraform apply -auto-approve tfplan
+          fi
+
+      - name: Terraform Destroy
+        if: always() && inputs.destroy_on_complete == true
+        working-directory: ${{ inputs.tf_dir }}
+        run: terraform destroy -auto-approve
+
