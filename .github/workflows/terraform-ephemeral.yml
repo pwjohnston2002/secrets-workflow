@@ -32,6 +32,16 @@ jobs:
     permissions:
       id-token: write # Required for requesting the OIDC token
       contents: read   # Required for checking out the repository
+    
+    services:
+      minio:
+        image: minio/minio:latest
+        ports:
+          - 9000:9000
+        command: server /data
+        env:
+          MINIO_ROOT_USER: minioadmin
+          MINIO_ROOT_PASSWORD: minioadmin
 
     steps:
       - name: Checkout repository
@@ -46,17 +56,53 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
-      - name: Terraform Init, Plan, and Apply
+      - name: Wait for MinIO service to be ready
+        run: |
+          echo "Waiting for MinIO to be healthy..."
+          until curl -s http://minio:9000/minio/health/live; do
+            echo -n "."
+            sleep 1
+          done
+          echo "MinIO is up!"
+
+      - name: Generate Terraform Backend Config
         working-directory: ${{ inputs.tf_dir }}
         run: |
-          terraform init
+          # Create a unique bucket name for this run to avoid potential conflicts.
+          # Using the run ID ensures uniqueness.
+          BUCKET_NAME="tf-state-${{ github.run_id }}"
+          echo "BUCKET_NAME=$BUCKET_NAME" >> $GITHUB_ENV
+
+          cat <<EOF > backend.tf
+          terraform {
+            backend "s3" {
+              bucket                      = "$BUCKET_NAME"
+              key                         = "terraform.tfstate"
+              region                      = "us-east-1" # This is ignored by MinIO but required by the provider
+              endpoint                    = "http://minio:9000"
+              skip_credentials_validation = true
+              skip_region_validation      = true
+              force_path_style            = true
+            }
+          }
+          EOF
+
+      - name: Terraform Init, Plan, and Apply
+        working-directory: ${{ inputs.tf_dir }}
+        env:
+          AWS_ACCESS_KEY_ID: minioadmin
+          AWS_SECRET_ACCESS_KEY: minioadmin
+        run: |
+          terraform init -reconfigure
           terraform plan -out=tfplan
           if [ "${{ inputs.apply }}" == "true" ]; then
             terraform apply -auto-approve tfplan
           fi
 
       - name: Terraform Destroy
-        if: always() && inputs.destroy_on_complete == true
+        if: always() && inputs.apply == true && inputs.destroy_on_complete == true
         working-directory: ${{ inputs.tf_dir }}
+        env:
+          AWS_ACCESS_KEY_ID: minioadmin
+          AWS_SECRET_ACCESS_KEY: minioadmin
         run: terraform destroy -auto-approve
-
