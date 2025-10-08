@@ -31,13 +31,15 @@ This is the recommended and more robust pattern for ephemeral state. We run an S
     *   **Zero Cost:** The MinIO container is created and destroyed with the CI job, incurring no persistent storage costs.
     *   **Realistic Simulation:** It perfectly mimics the pattern of using a real S3 bucket for state, making the CI environment a high-fidelity representation of a production setup.
 
+> **Note:** The S3 backend provides state locking only when used with DynamoDB. Because we run in a single job and do not provision DynamoDB, we serialize runs via a workflow `concurrency` group to avoid parallel state access.
+
 ## 3. Implementation in the `terraform-ephemeral.yml` Workflow
 
 Our reusable workflow implements the MinIO-in-CI pattern automatically. Here’s how the pieces fit together.
 
 ### Step 1: Start the MinIO Service Container
 
-A `services` block in the workflow file starts the MinIO container. GitHub Actions handles networking, so it's available at the hostname `minio`.
+A `services` block in the workflow file starts the MinIO container. GitHub Actions handles networking, so it's available at the hostname `minio`. For internal networking we do not publish host ports, and we generate per-run credentials. The container is reachable as `http://minio:9000` from workflow steps only.
 
 ```yaml
 services:
@@ -92,5 +94,7 @@ The MinIO container automatically shuts down with the job, ensuring no residual 
 This completes the pattern, providing a secure, isolated, and truly ephemeral state backend for every workflow run.
 
 See also:
- - [Runbook: OIDC Federation](./oidc_federation.md)
- - [Reusable Workflow: terraform-ephemeral.yml](../../.github/workflows/terraform-ephemeral.yml)
+
+* [Runbook: OIDC Federation](./oidc_federation.md)
+* [Reusable Workflow: terraform-ephemeral.yml](../../.github/workflows/terraform-ephemeral.yml)
+* [Runbook: Local Development Setup](./local_dev_setup.md)
