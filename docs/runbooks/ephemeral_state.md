@@ -65,13 +65,17 @@ concurrency:
 
 ### 3) Start MinIO Service (Pinned Digest, No Host Ports)
 
+> **Note:** MinIO service containers are supported only on GitHub-hosted Linux runners.
+
 ```yaml
 services:
   minio:
-    image: minio/minio@sha256:REPLACE_WITH_REAL_DIGEST
+    # Pinned digest for supply-chain security. See Docker Hub for latest.
+    image: minio/minio@sha256:2061b442f48a280793020291c1273ed5b364d0458032b339953a18a57b224445
     env:
       MINIO_ROOT_USER: ${{ steps.secrets.outputs.MINIO_USER }}
       MINIO_ROOT_PASSWORD: ${{ steps.secrets.outputs.MINIO_PASS }}
+    # Health checks ensure the service is ready before steps run.
     options: >-
       --health-cmd="curl -f http://localhost:9000/minio/health/ready || exit 1"
       --health-interval=2s --health-retries=30 --health-timeout=2s
@@ -127,6 +131,7 @@ EOF
   run: |
     rm -f backend.tf || true
     rm -rf .terraform || true
+    rm -f .terraform.lock.hcl || true
     rm -f terraform.tfstate terraform.tfstate.backup || true
 ```
 
@@ -181,4 +186,4 @@ See also:
 
 * [Runbook: OIDC Federation](./oidc_federation.md)
 * [Reusable Workflow: terraform-ephemeral.yml](../../.github/workflows/terraform-ephemeral.yml)
-* [Runbook: Local Development Setup](./local_dev_setup.md)
+* [Runbook: Local Development Setup](./local_dev_setup.md) 
