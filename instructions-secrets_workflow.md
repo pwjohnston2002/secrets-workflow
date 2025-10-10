@@ -29,6 +29,7 @@ Use this as the entry point when scanning or reviewing the repo as a whole.
 | `secrets_workflow-README.md`                | Public overview & philosophy                            | For human readers first                 |
 | `secrets_workflow_project_tracker.md`       | Roadmap, tasks, risks, testing                          | Execution guide for human + AI          |
 | `docs/runbooks/`                            | Step-by-step guides (local dev, instance access)        | Onboarding and operational focus        |
+| `docs/policies/`                            | Formal policies for branching, releases, etc.           | Authoritative rules for contribution    |
 | `.github/workflows/terraform-ephemeral.yml` | Reusable CI workflow for ephemeral Terraform            | Published for consumption (`@v0.1.0`)   |
 | `.github/workflows/security-scans.yml`      | Reusable CI workflow for IaC + secret scanning          | Includes `gitleaks`, `tfsec`, `checkov` |
 | `modules/`                                  | Minimal Terraform modules (OIDC roles, ephemeral MinIO) | Example-driven, portfolio-aligned       |
@@ -75,6 +76,22 @@ Use this as the entry point when scanning or reviewing the repo as a whole.
 * Project tracker updated.
 * Tagged release (semver) published.
 * [`secrets_workflow_project_tracker.md`]( https://github.com/pwjohnston2002/secrets-workflow/blob/main/secrets_workflow_project_tracker.md ) updated to reflect progress (authoritative task-level detail). #will update link when project repo is public, not yet.
+
+---
+
+### Branching & Commit Scope
+
+To ensure consistent development practices and clear communication, the branching and commit strategy adapts to the current project phase. This allows for rapid iteration during exploratory stages and precise control during production-level development.
+
+For specific naming conventions, PR requirements, and CI gates, see the formal Branching Policy.
+
+| Phase                       | Branch Style                                                                                         | Commit Granularity                                | AI Guidance                                           |
+| --------------------------- | ---------------------------------------------------------------------------------------------------- | ------------------------------------------------- | ----------------------------------------------------- |
+| **Exploratory / Pre-Prod**  | Feature-level (“chunk”) branches that deliver conceptual patterns (e.g. `implement-ephemeral-state`) | Multiple small commits capturing design evolution | Favor speed and learning. Allow broader scopes.       |
+| **Stabilization / QA**      | Mid-sized branches focused on one cohesive subsystem                                                 | Commits should be self-testing and revertible     | Begin enforcing semantic commits and teardown checks. |
+| **Production / Maintained** | Atomic branches tied to single stories or bugfixes                                                   | One atomic, deployable change per commit          | Require CI pass + teardown proof before merge.        |
+
+The AI must infer the correct scope from the current **project phase** (tracked in `secrets_workflow_project_tracker.md`). If the phase is labeled *Pre-Prod* or *Pattern Validation*, use feature-level branches. If *Prod* or *Maintained*, recommend smaller, atomic branches.
 
 ---
 
