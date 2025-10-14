@@ -44,6 +44,49 @@ After applying this Terraform, store the output `github_oidc_role_arn` as a secr
 
 A complete, working configuration that uses this module can be found in the `examples/oidc-aws-setup` directory. This example is used for automated testing in CI.
 
+## CI/CD Validation
+
+This module is automatically validated on every pull request by the `.github/workflows/validate-modules.yml` workflow. This workflow solves the "bootstrapping paradox" by using a dedicated IAM user with static, long-lived credentials (`AWS_BOOTSTRAP_ACCESS_KEY_ID`) to run a full `terraform apply` and `terraform destroy` lifecycle against the `examples/oidc-aws-setup` configuration.
+
+### Bootstrap IAM Policy
+
+The IAM user for the bootstrap credentials must have a minimal, least-privilege policy attached. This policy grants only the permissions necessary to create and destroy the OIDC provider and the test role itself, and nothing more.
+
+<details>
+<summary>Click to view the required IAM policy</summary>
+
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "ManageOIDCProvider",
+            "Effect": "Allow",
+            "Action": [
+                "iam:CreateOpenIDConnectProvider",
+                "iam:DeleteOpenIDConnectProvider",
+                "iam:GetOpenIDConnectProvider",
+                "iam:ListOpenIDConnectProviders",
+                "iam:TagOpenIDConnectProvider",
+                "iam:UntagOpenIDConnectProvider"
+            ],
+            "Resource": "arn:aws:iam::*:oidc-provider/token.actions.githubusercontent.com"
+        },
+        {
+            "Sid": "ManageOIDCRole",
+            "Effect": "Allow",
+            "Action": [
+                "iam:CreateRole",
+                "iam:DeleteRole",
+                "iam:GetRole"
+            ],
+            "Resource": "arn:aws:iam::*:role/github-oidc-role-*"
+        }
+    ]
+}
+```
+</details>
+
 ## Requirements
 
 | Name | Version |

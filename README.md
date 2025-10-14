@@ -21,6 +21,20 @@ This approach ensures:
   - OIDC Federation with AWS: How to set up and use passwordless authentication from GitHub Actions to AWS.
 - **Terraform Modules:** For common ephemeral patterns.
 
+### Developer Standards & Quality Checks
+
+When cloning or using this repository independently, ensure that Terraform code quality checks are in place.  
+Before any `plan` or `apply` actions, the following should run locally or in CI:
+
+- `terraform fmt -check` – Enforces consistent Terraform style.  
+- `tflint` – Performs static analysis and validates Terraform best practices.
+
+If this repository is being used as a supplement to the
+[`workflow-toolbelt`](https://github.com/pwjohnston2002/workflow-toolbelt) project,
+note that both `terraform fmt` and `tflint` checks are already incorporated within that repository’s CI workflows.  
+This ensures consistent formatting and validation across all dependent modules.
+
+
 ## Future Vision: From CI/CD to AI-Driven GitOps
 
 The patterns established here are more than just best practices for CI/CD; they are the foundational building blocks for a future where infrastructure is managed through fully automated, AI-driven GitOps.

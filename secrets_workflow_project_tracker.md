@@ -244,6 +244,9 @@ This repository is a foundational dependency for the `workflow-toolbelt`. The in
 | **Complexity of ephemeral patterns** | Medium | Start with minimal patterns, iterative expansion, focus on clear examples. |
 
 ### Additional Risks
+- **Bootstrap Credential Management:**
+  - Impact: High — The `AWS_BOOTSTRAP_ACCESS_KEY_ID` is a long-lived secret required for CI validation.
+  - Mitigation: The associated IAM user has a minimal, least-privilege policy. The key should be rotated quarterly by the repository owner and stored securely.
 - **Version Drift Between Repos:**
   - Impact: Medium — Breakages if consumers track `main`.
   - Mitigation: Enforce semver tags; document breaking changes; pin `workflow_call` to tags.
