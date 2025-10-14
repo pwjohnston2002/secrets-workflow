@@ -160,13 +160,13 @@ This repository is a foundational dependency for the `workflow-toolbelt`. The in
 
 ### Phase 1.5 — Validation & Testing
 - [ ] Implement **Terratest examples** demonstrating create→assert→destroy patterns for ephemeral infrastructure.
-- [ ] Build a **test harness** for validating that the `destroy` step leaves zero cloud resources.
+- [X] Build a **test harness** for validating that the `destroy` step leaves zero cloud resources (via `validate-modules.yml` workflow).
 - [ ] **Add Terratest for SSM reachability** to assert that `start-session` can connect to a provisioned instance.
 
 ### Phase 2 — Workflow Integration & Hardening
 - [ ] **Integrate reusable workflows** (`workflow_call`) for ephemeral Terraform init/plan/apply/destroy into the Workflow Toolbelt.
 - [ ] Add **dynamic secret injection via runtime generation and sops decryption** into CI/CD pipelines.
-- [ ] Set up **least-privilege IAM roles** for OIDC federation, scoped to ephemeral operations.
+- [X] Set up **least-privilege IAM roles** for OIDC federation, scoped to ephemeral operations (via `modules/oidc-aws`).
 - [ ] **Create a reusable Terraform module for secure instance access** (`modules/instance_access_ssm`) that configures an instance profile for SSM and security groups (no port 22).
 - [ ] Document usage patterns for developers for consuming ephemeral patterns.
 - [ ] **Implement Observability:** Add logging for OIDC session IDs and MinIO access to CI workflows.
@@ -175,7 +175,7 @@ This repository is a foundational dependency for the `workflow-toolbelt`. The in
 - [ ] Develop **basic cross-cloud OIDC→STS examples** (GCP and Azure) to prove pattern portability.
 
 ### Phase 3 — Advanced Features & Key Management
-- [ ] Create **Terraform modules** for common ephemeral patterns (e.g., `oidc-role-aws`, `ephemeral-minio`).
+- [X] Create **Terraform modules** for common ephemeral patterns (e.g., `oidc-role-aws`).
 - [ ] Refine **teardown guarantees** with advanced Terratest validation.
 - [ ] **Evolve Key Management:**
     - [ ] Propose and document advanced `age` key management strategies (e.g., bootstrapping with OIDC-signed secrets).
