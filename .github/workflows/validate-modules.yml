@@ -1,0 +1,96 @@
+# .github/workflows/validate-modules.yml
+
+# NOTE: This workflow uses static bootstrap credentials (`AWS_BOOTSTRAP_*`)
+# solely for testing the creation of OIDC infrastructure itself. It solves the
+# "bootstrapping paradox" where an OIDC-based workflow cannot create its own role.
+
+name: Validate Terraform Modules
+
+on:
+  pull_request:
+    paths:
+      - 'modules/**'
+      - 'examples/**'
+      - '.github/workflows/validate-modules.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-oidc-aws-module:
+    name: Validate oidc-aws Module
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read # Required for checking out the repository
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials (Bootstrap)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_BOOTSTRAP_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_BOOTSTRAP_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        id: init
+        working-directory: ./examples/oidc-aws-setup
+        run: terraform init
+
+      - name: Terraform Validate
+        id: validate
+        working-directory: ./examples/oidc-aws-setup
+        run: terraform validate
+
+      - name: Terraform Plan
+        id: plan
+        working-directory: ./examples/oidc-aws-setup
+        run: |
+          terraform plan \
+            -var="github_owner=${{ github.repository_owner }}" \
+            -var="github_repo=${{ github.event.repository.name }}" \
+            -var="branch_name=${{ github.head_ref || github.ref_name }}" \
+            -var="aws_region=${{ secrets.AWS_REGION }}" \
+            -detailed-exitcode
+
+      - name: Terraform Apply
+        working-directory: ./examples/oidc-aws-setup
+        run: |
+          terraform apply -auto-approve \
+            -var="github_owner=${{ github.repository_owner }}" \
+            -var="github_repo=${{ github.event.repository.name }}" \
+            -var="branch_name=${{ github.head_ref || github.ref_name }}" \
+            -var="aws_region=${{ secrets.AWS_REGION }}"
+
+      - name: Terraform Destroy
+        if: always() # This step must run even if apply fails to clean up partial infrastructure
+        working-directory: ./examples/oidc-aws-setup
+        run: |
+          terraform destroy -auto-approve \
+            -var="github_owner=${{ github.repository_owner }}" \
+            -var="github_repo=${{ github.event.repository.name }}" \
+            -var="branch_name=${{ github.head_ref || github.ref_name }}" \
+            -var="aws_region=${{ secrets.AWS_REGION }}"
+
+      - name: Verify Teardown (Teardown Guarantee)
+        if: always() # This step must run even if apply/destroy fails
+        run: |
+          # Construct the expected role name from the module's naming convention
+          ROLE_NAME="github-oidc-role-${{ github.repository_owner }}-${{ github.event.repository.name }}"
+          echo "Verifying that IAM role '$ROLE_NAME' has been destroyed..."
+
+          # Attempt to get the role. This command SHOULD fail.
+          # If it succeeds (exit code 0), the role still exists, which is a failure.
+          if aws iam get-role --role-name "$ROLE_NAME" >/dev/null 2>&1; then
+            echo "::error::Teardown FAILED. IAM role '$ROLE_NAME' still exists."
+            exit 1
+          else
+            echo "Teardown successful. IAM role '$ROLE_NAME' was correctly destroyed."
+          fi
