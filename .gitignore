@@ -3,3 +3,4 @@
 # Ignore plaintext secret files
 *.tfvars
 !*.tfvars.enc
+next.md
