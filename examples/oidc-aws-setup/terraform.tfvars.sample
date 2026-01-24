@@ -1,0 +1,6 @@
+# Example input values for local testing of the OIDC module
+
+github_owner = "example-user-or-org"
+github_repo  = "example-repo"
+branch_name  = "main"
+region       = "us-east-1"
