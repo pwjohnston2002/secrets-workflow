@@ -1,20 +1,17 @@
-variable "aws_region" {
-  description = "The AWS region where resources will be created."
-  type        = string
+variable "github_owner" { 
+  type = string 
 }
 
-variable "github_owner" {
-  description = "The GitHub organization or user that owns the repository."
-  type        = string
+variable "github_repo"  { 
+  type = string 
 }
 
-variable "github_repo" {
-  description = "The name of the GitHub repository."
-  type        = string
+variable "branch_name"  { 
+  type = string
+  default = "main" 
 }
 
-variable "branch_name" {
-  description = "The branch name to scope the OIDC trust policy to."
-  type        = string
-  default     = "main"
+variable "region"  { 
+  type = string
+  default = "us-east-1" 
 }
