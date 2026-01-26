@@ -155,8 +155,8 @@ This repository is a foundational dependency for the `workflow-toolbelt`. The in
 - [X] **Establish `sops+age` for encrypting static configuration examples** and demonstrating in-repo secret management.
 - [X] **Define patterns for Terraform `local` backend and MinIO-in-CI** for ephemeral state management.
 - [X] **Create runbook for local development setup** (`docs/runbooks/local_dev_setup.md`) covering `aws-vault` and `sops+age` key access.
-- [ ] **Create runbook for secure instance access** (`docs/runbooks/instance_access.md`) covering SSM usage (shell, port-forwarding, logging).
-- [ ] Create initial `PRINCIPLES.md` outlining the "no long-lived infra" philosophy.
+- [X] **Create runbook for secure instance access** (`docs/runbooks/instance_access.md`) covering SSM usage (shell, port-forwarding, logging).
+- [X] Create initial `PRINCIPLES.md` outlining the "no long-lived infra" philosophy.
 
 ### Phase 1.5 — Validation & Testing
 - [ ] Implement **Terratest examples** demonstrating create→assert→destroy patterns for ephemeral infrastructure.
