@@ -159,16 +159,17 @@ This repository is a foundational dependency for the `workflow-toolbelt`. The in
 - [X] Create initial `PRINCIPLES.md` outlining the "no long-lived infra" philosophy.
 
 ### Phase 1.5 — Validation & Testing
-- [ ] Implement **Terratest examples** demonstrating create→assert→destroy patterns for ephemeral infrastructure.
+- [X] Implement **Terratest examples** demonstrating create→assert→destroy patterns for ephemeral infrastructure.
 - [X] Build a **test harness** for validating that the `destroy` step leaves zero cloud resources (via `validate-modules.yml` workflow).
-- [ ] **Add Terratest for SSM reachability** to assert that `start-session` can connect to a provisioned instance.
+- [X] **Add Terratest for SSM reachability** to assert that `start-session` can connect to a provisioned instance (functionally validated with admin permissions).
 
 ### Phase 2 — Workflow Integration & Hardening
 - [ ] **Integrate reusable workflows** (`workflow_call`) for ephemeral Terraform init/plan/apply/destroy into the Workflow Toolbelt.
 - [ ] Add **dynamic secret injection via runtime generation and sops decryption** into CI/CD pipelines.
 - [X] Set up **least-privilege IAM roles** for OIDC federation, scoped to ephemeral operations (via `modules/oidc-aws`).
-- [ ] **Create a reusable Terraform module for secure instance access** (`modules/instance_access_ssm`) that configures an instance profile for SSM and security groups (no port 22).
+- [X] **Create a reusable Terraform module for secure instance access** (`modules/instance-ssm-profile`) that configures an instance profile for SSM and security groups (no port 22).
 - [ ] Document usage patterns for developers for consuming ephemeral patterns.
+- [ ] **Harden IAM Policy for Terratests:** Refine the `iamtest` user policy to achieve least-privilege while still allowing all tests to pass.
 - [ ] **Implement Observability:** Add logging for OIDC session IDs and MinIO access to CI workflows.
 - [ ] Integrate **policy-as-code tools** (`checkov`, `tfsec`) into CI workflows.
 - [ ] Integrate **`gitleaks`** into CI and `pre-commit` hooks.

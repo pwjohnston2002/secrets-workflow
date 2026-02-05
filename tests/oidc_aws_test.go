@@ -42,6 +42,10 @@ func TestOIDCModuleTrustPolicy(t *testing.T) {
 	defer func() {
 		terraform.Destroy(t, tf)
 
+		if roleName == "" {
+			return
+		}
+
 		// Post-destroy verification: IAM role should be gone
 		cfg, err := config.LoadDefaultConfig(t.Context())
 		if err != nil {
