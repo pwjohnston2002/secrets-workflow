@@ -1,5 +1,21 @@
-.DS_Store
-
-# Ignore plaintext secret files
+# Local Terraform files
+*.tfstate
+*.tfstate.*
+.terraform/
 *.tfvars
-!*.tfvars.enc
+
+# Ignore all .tfvars files, but not .tfvars.sample files
+!*.tfvars.sample
+
+# Crash log files
+crash.log
+
+# Local go build output
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Mac system files
+.DS_Store

@@ -27,6 +27,7 @@ Use this as the entry point when scanning or reviewing the repo as a whole.
 | File                                        | Purpose                                                 | Notes                                   |
 | ------------------------------------------- | ------------------------------------------------------- | --------------------------------------- |
 | `secrets_workflow-README.md`                | Public overview & philosophy                            | For human readers first                 |
+| `PRINCIPLES.md`                             | Core design philosophy & non-negotiable rules           | Guiding document for contributors & architects |
 | `secrets_workflow_project_tracker.md`       | Roadmap, tasks, risks, testing                          | Execution guide for human + AI          |
 | `docs/runbooks/`                            | Step-by-step guides (local dev, instance access)        | Onboarding and operational focus        |
 | `docs/policies/`                            | Formal policies for branching, releases, etc.           | Authoritative rules for contribution    |
