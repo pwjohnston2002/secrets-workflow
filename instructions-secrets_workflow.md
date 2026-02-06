@@ -70,6 +70,15 @@ Use this as the entry point when scanning or reviewing the repo as a whole.
 4. Use AI (here) for design deep dives, debugging, and conceptual reviews.
 5. Before handing to Codex for repo-wide review, prepare a **Handoff Note** (goal, scope, validation).
 
+### IAM Deployment Preflight (Required for Cloud Apply)
+
+Before any real cloud deployment (Terraform apply, CloudFormation deploy, CDK deploy), run the IAM preflight gates in:
+`docs/preflight/aws_iam_deployment_readiness.md`.
+
+Record the results using the template at `docs/preflight/iam_preflight_run_template.md`.
+
+AI should treat the gates as a mandatory checklist and must not recommend applying changes to AWS until the checklist is explicitly walked and marked pass/fail.
+
 **Definition of Done:**
 
 * All tests/scans pass (`checkov`, `tfsec`, `gitleaks`, teardown).
