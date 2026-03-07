@@ -1,3 +1,7 @@
+# Deprecated
+# MOVED
+This file has been migrated to AGENTS.md.
+
 # instructions-secrets\_workflow\.md
 
 📌 **NOTE:** This file is the **single point of reference** for project context.

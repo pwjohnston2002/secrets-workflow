@@ -1,3 +1,7 @@
+# Deprecated
+# MOVED
+This file has been migrated to project_tracker.md.
+
 # Secrets Workflow Project Tracker
 
 ## Project Complexity Level
@@ -384,3 +388,5 @@ This matrix outlines the testing strategy for the core components of the ephemer
 | **`sops+age` Decryption** | 1.5 | Unit | Shell Script / Go Test | Verify that an encrypted file can be successfully decrypted in the CI environment using a test key. |
 | **Full Teardown Guarantee** | 2 | End-to-End | Terratest | After `terraform destroy`, use the cloud provider's SDK within the test to list resources and assert that no resources created by the test remain. |
 | **Policy-as-Code Scanners** | 2 | Integration | CI Workflow | Run scanners (`checkov`, `tfsec`) against intentionally insecure Terraform code to ensure the pipeline fails as expected. |
+# MOVED
+This file has been migrated to project_tracker.md.
