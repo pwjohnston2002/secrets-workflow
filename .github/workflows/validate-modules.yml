@@ -57,7 +57,7 @@ jobs:
             -var="github_owner=${{ github.repository_owner }}" \
             -var="github_repo=${{ github.event.repository.name }}" \
             -var="branch_name=${{ github.head_ref || github.ref_name }}" \
-            -var="aws_region=${{ secrets.AWS_REGION }}" \
+            -var="region=${{ secrets.AWS_REGION }}" \
             -detailed-exitcode
 
       - name: Terraform Apply
@@ -67,7 +67,7 @@ jobs:
             -var="github_owner=${{ github.repository_owner }}" \
             -var="github_repo=${{ github.event.repository.name }}" \
             -var="branch_name=${{ github.head_ref || github.ref_name }}" \
-            -var="aws_region=${{ secrets.AWS_REGION }}"
+            -var="region=${{ secrets.AWS_REGION }}"
 
       - name: Terraform Destroy
         if: always() # This step must run even if apply fails to clean up partial infrastructure
@@ -77,7 +77,7 @@ jobs:
             -var="github_owner=${{ github.repository_owner }}" \
             -var="github_repo=${{ github.event.repository.name }}" \
             -var="branch_name=${{ github.head_ref || github.ref_name }}" \
-            -var="aws_region=${{ secrets.AWS_REGION }}"
+            -var="region=${{ secrets.AWS_REGION }}"
 
       - name: Verify Teardown (Teardown Guarantee)
         if: always() # This step must run even if apply/destroy fails
