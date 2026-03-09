@@ -13,6 +13,7 @@
 - **Primary Objective:** Establish a secure, reusable, ephemeral-first methodology and reference implementation set for secrets handling, Terraform state handling, federated authentication, and safe cloud-access workflows.
 - **Current Role:** Supporting security/infrastructure capability repo for downstream portfolio projects and workflow consumers.
 - **Current Version:** v0.1-draft
+- **Current Maturity Read:** Repo purpose and capability boundary are now broadly understood; the primary maturity gap is trustworthiness of claims (implementation/docs/contract alignment), not mission ambiguity.
 
 ### Success Criteria
 - Reusable patterns exist for ephemeral auth, ephemeral state, and encrypted or runtime-generated secret handling.
@@ -130,6 +131,11 @@ Open tasks:
 - [ ] Harden IAM/test permissions toward least privilege
 - [ ] Reconcile AWS-first implementation with any cloud-agnostic claims
 
+Current maturity focus (Phase 2):
+- [ ] Improve trust through implementation/documentation truth alignment
+- [ ] Stabilize the minimum downstream contract surface before expanding features
+- [ ] Prove claims with stronger evidence (teardown, scans/tests, auditability)
+
 ### Phase 3 — Advanced Evolution
 **Goal:** Improve maturity without violating the repo’s capability boundary.
 
@@ -176,6 +182,17 @@ Open tasks:
 - **Failure Modes:** Security theater, stranded resources, misleading portfolio claims
 - **AI Collaboration Notes:** AI should prefer evidence, not optimism
 
+### Task: Shape First Stable Release Boundary
+- **State:** `[ ]` To Do
+- **Context Dependencies:** current modules/examples/tests, workflow inventory, release/versioning policy expectations
+- **Goal:** Define what belongs in the first stable contract release versus what remains experimental/internal
+- **Success Criteria:**
+  - [ ] Stable vs experimental elements are identified explicitly
+  - [ ] Breaking-change expectations are defined for contract-bearing artifacts
+  - [ ] Downstream pinning guidance is scoped for the first stable release
+- **Failure Modes:** Premature guarantees, hidden breaking changes, downstream pinning confusion
+- **AI Collaboration Notes:** Avoid inventing release artifacts; shape boundaries from verified repo reality
+
 ### Task: Improve Key Management Guidance
 - **State:** `[ ]` To Do
 - **Context Dependencies:** `sops/age` usage model, local dev runbook, team-sharing scenarios
@@ -194,11 +211,51 @@ Open tasks:
 | Risk | Impact | Mitigation |
 |---|---|---|
 | Workflow/doc drift | High | Treat mismatches as defects; correct or relabel aspirational content |
+| Purpose clarity without contract clarity | High | Treat this as a maturation stage: keep mission stable, focus on trust/contract/evidence alignment |
 | Incomplete teardown on failure paths | High | Strengthen destroy validation and explicit cleanup expectations |
 | Long-lived bootstrap secrets creeping back in | High | Prefer OIDC and ephemeral credentials; document exceptions loudly |
 | Overstated cloud-agnostic positioning | Medium | Describe current repo as AWS-reference-first until other clouds are implemented credibly |
 | Consumer contract ambiguity | Medium | Version interfaces, document inputs/outputs, provide examples |
 | Key management confusion for `age` | High | Separate current workable guidance from future hardening strategies |
+
+## 7.5) Open Information Still Needed (Tracker-Canonical)
+
+This section captures unresolved planning/sequence questions. It is intentionally tracker-native and should later be promoted into stable reference docs once decisions are finalized.
+
+### Downstream Contract Surface (Unresolved)
+- Exact workflow inputs/outputs that downstream consumers can rely on today
+- Supported example paths intended as contract-bearing references versus internal experiments
+- Versioning expectations for reusable artifacts and what consumers should pin to
+- Minimum guaranteed interface set for downstream adoption
+
+### Repo Reality vs Aspirational Inventory (Unresolved)
+- Verified inventory of implemented workflows/contracts in current repo state
+- Explicit list of planned but not yet implemented workflow artifacts
+- Documentation locations that currently overstate implementation maturity
+
+### Current Contract Inventory Baseline (Working Table)
+
+| Artifact | Type | Repo Reality (Now) | Support Signal (Now) | Planned/Notes |
+|---|---|---|---|---|
+| `.github/workflows/terraform-ephemeral.yml` | Reusable workflow | Implemented | Candidate contract surface; inputs are present, outputs/guarantees still need explicit stabilization | Keep in inventory while contract semantics are finalized |
+| `.github/workflows/validate-modules.yml` | Validation workflow | Implemented | Internal validation evidence path; not currently defined as downstream reusable contract | Keep as internal validation workflow unless contract intent changes |
+| `.github/workflows/security-scans.yml` | Reusable workflow | Not present in current repo | Not supportable as implemented contract until added | References in docs/policies should be relabeled as planned or implemented |
+| `modules/oidc-aws` | Terraform module | Implemented | Candidate stable module contract pending versioning and breaking-change rules | Keep usage/docs aligned with real inputs/outputs |
+| `modules/instance-ssm-profile` | Terraform module | Implemented | Candidate stable module contract pending versioning and downstream expectations | Keep example/test coverage aligned with module behavior |
+| `examples/oidc-aws-setup` | Terraform example | Implemented | Validation-oriented reference example; contract role should be explicit (reference vs guaranteed) | Clarify supported-consumer status in docs |
+| `examples/ssm-instance` | Terraform example | Implemented | Validation-oriented reference example; not yet declared as stable downstream interface | Clarify supported-consumer status in docs |
+| `examples/secrets/example.tfvars.enc` | Encrypted sample artifact | Implemented | Illustrative encrypted pattern; not a reusable interface contract | Keep as encrypted example only |
+
+### Release Semantics (Unresolved)
+- What gets versioned first (workflows, modules, docs contracts, or a scoped subset)
+- How downstream users pin and consume versions safely
+- What counts as a breaking change for this capability repo
+
+### Evidence Gaps for Claims (Unresolved)
+- Stronger teardown guarantee evidence, including failure-path behavior
+- Clear CI scan/test expectation baseline and pass/fail gates grounded in current reality
+- Auditability/observability evidence for OIDC sessions and ephemeral state access workflows
+- Decision on whether cloud-agnostic language remains broad or is tightened to AWS-first until cross-cloud parity exists
 
 ---
 
@@ -241,15 +298,18 @@ Open tasks:
 - **Context Version:** v1.1
 - **Last Context Audit:** 2026-03-07
 - **Context Debt:**
+  - Repo purpose is clear, but contract and evidence maturity still lag implementation claims
   - Some docs describe workflows or security posture more completely than the current repo implements
   - Cloud-agnostic framing is ahead of implementation
   - Key-management maturity is still partial
 - **Proactive Context Gaps:**
   - Exact downstream workflow contracts need tighter definition
+  - Stable vs experimental release boundary needs explicit documentation
   - Explicit residual-resource validation can be strengthened
   - Observability patterns need more concrete implementation evidence
 - **Context Compression Events:**
   - Older planning text should be summarized when superseded by repo-verified reality
+  - As contracts stabilize, promote them from tracker notes to dedicated consumer-facing reference docs
 - **Evolution Triggers:**
   - New release tags
   - Workflow contract changes
@@ -289,6 +349,9 @@ Open tasks:
 
 - [x] Review `AGENTS.md` against actual repo paths and commands one final time
 - [x] Decide whether to rename legacy `instructions-secrets_workflow.md` to archival/supporting-doc status
-- [ ] Reconcile README and repo docs with current implementation reality
+- [ ] Reconcile README and repo docs with current implementation reality (truth alignment first)
+- [ ] Produce an implemented-vs-planned inventory for reusable workflows/contracts
 - [ ] Define the minimum stable downstream contract for first tagged release
+- [ ] Define first-release versioning semantics and breaking-change criteria for downstream consumers
+- [ ] Identify which tracker decisions are ready to promote into stable reference/contract documentation
 - [ ] Preserve this repo as a supporting capability boundary until cross-repo comparison is complete
