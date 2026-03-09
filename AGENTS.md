@@ -127,7 +127,21 @@ Do not substitute “similar” commands unless the repo actually uses them.
 - Cross-module refactors that materially change repo structure.
 - Changes that broaden this repo from reference capability into general application/infrastructure management.
 
-### 🚫 Never Do
+### � Dual Control Protocol
+This protocol applies to high-blast-radius actions, including:
+- Destructive or irreversible Terraform operations (`apply`, `destroy`) against non-demo, non-ephemeral, or real AWS resources.
+- Deleting or mutating Terraform state, encrypted secret material, or access configuration in ways that could cause loss, lockout, or security regression.
+- Changing IAM, OIDC, SSM, or other access-control behavior in a way that could break access or reduce security.
+- Disabling or weakening preflight gates, teardown guarantees, auditability, or other safety controls.
+
+If such an action is required:
+1. **STOP.**
+2. Explain the blast radius in plain language.
+3. Request explicit human approval using this exact string: `APPROVE DESTRUCTIVE ACTION`.
+4. Wait for that exact string before proceeding.
+
+### �🚫 Never Do
+- Commit directly to the `main` branch.
 - Commit secrets, credentials, decrypted secret material, or long-lived access keys.
 - Normalize long-lived infrastructure for secrets or state.
 - Weaken teardown guarantees.
@@ -213,5 +227,5 @@ This file must remain concise.
 
 ---
 
-Last Updated: 2026-03-07  
+Last Updated: 2026-03-08 
 Owner: Repository maintainer
