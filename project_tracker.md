@@ -233,6 +233,19 @@ This section captures unresolved planning/sequence questions. It is intentionall
 - Explicit list of planned but not yet implemented workflow artifacts
 - Documentation locations that currently overstate implementation maturity
 
+### Current Contract Inventory Baseline (Working Table)
+
+| Artifact | Type | Repo Reality (Now) | Support Signal (Now) | Planned/Notes |
+|---|---|---|---|---|
+| `.github/workflows/terraform-ephemeral.yml` | Reusable workflow | Implemented | Candidate contract surface; inputs are present, outputs/guarantees still need explicit stabilization | Keep in inventory while contract semantics are finalized |
+| `.github/workflows/validate-modules.yml` | Validation workflow | Implemented | Internal validation evidence path; not currently defined as downstream reusable contract | Keep as internal validation workflow unless contract intent changes |
+| `.github/workflows/security-scans.yml` | Reusable workflow | Not present in current repo | Not supportable as implemented contract until added | References in docs/policies should be relabeled as planned or implemented |
+| `modules/oidc-aws` | Terraform module | Implemented | Candidate stable module contract pending versioning and breaking-change rules | Keep usage/docs aligned with real inputs/outputs |
+| `modules/instance-ssm-profile` | Terraform module | Implemented | Candidate stable module contract pending versioning and downstream expectations | Keep example/test coverage aligned with module behavior |
+| `examples/oidc-aws-setup` | Terraform example | Implemented | Validation-oriented reference example; contract role should be explicit (reference vs guaranteed) | Clarify supported-consumer status in docs |
+| `examples/ssm-instance` | Terraform example | Implemented | Validation-oriented reference example; not yet declared as stable downstream interface | Clarify supported-consumer status in docs |
+| `examples/secrets/example.tfvars.enc` | Encrypted sample artifact | Implemented | Illustrative encrypted pattern; not a reusable interface contract | Keep as encrypted example only |
+
 ### Release Semantics (Unresolved)
 - What gets versioned first (workflows, modules, docs contracts, or a scoped subset)
 - How downstream users pin and consume versions safely
