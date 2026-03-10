@@ -21,6 +21,19 @@ on:
         description: "Set to 'true' to guarantee teardown."
         type: boolean
         default: true
+    outputs:
+      plan_artifact_path:
+        description: "Path to the generated Terraform plan file in the caller workspace."
+        value: ${{ jobs.terraform.outputs.plan_artifact_path }}
+      apply_executed:
+        description: "`true` when this run was configured to execute terraform apply."
+        value: ${{ jobs.terraform.outputs.apply_executed }}
+      destroy_executed:
+        description: "`true` when this run was configured to execute terraform destroy."
+        value: ${{ jobs.terraform.outputs.destroy_executed }}
+      destroy_succeeded:
+        description: "`true` if destroy was executed and completed successfully, `false` if executed and failed, `skipped` when destroy was not requested."
+        value: ${{ jobs.terraform.outputs.destroy_succeeded }}
     secrets:
       AWS_ROLE_TO_ASSUME:
         description: "The ARN of the IAM role to assume via OIDC."
@@ -33,10 +46,15 @@ jobs:
   terraform:
     name: Terraform Ephemeral Run
     runs-on: ubuntu-latest
+    outputs:
+      plan_artifact_path: ${{ steps.contract_outputs.outputs.plan_artifact_path }}
+      apply_executed: ${{ steps.contract_outputs.outputs.apply_executed }}
+      destroy_executed: ${{ steps.contract_outputs.outputs.destroy_executed }}
+      destroy_succeeded: ${{ steps.contract_outputs.outputs.destroy_succeeded }}
     permissions:
       id-token: write # Required for requesting the OIDC token
       contents: read   # Required for checking out the repository
-    
+
     services:
       minio:
         image: minio/minio:latest
@@ -92,6 +110,7 @@ jobs:
           EOF
 
       - name: Terraform Init, Plan, and Apply
+        id: terraform_run
         working-directory: ${{ inputs.tf_dir }}
         env:
           AWS_ACCESS_KEY_ID: minioadmin
@@ -104,9 +123,34 @@ jobs:
           fi
 
       - name: Terraform Destroy
+        id: terraform_destroy
         if: always() && inputs.apply == true && inputs.destroy_on_complete == true
         working-directory: ${{ inputs.tf_dir }}
         env:
           AWS_ACCESS_KEY_ID: minioadmin
           AWS_SECRET_ACCESS_KEY: minioadmin
         run: terraform destroy -auto-approve
+
+      - name: Emit reusable contract outputs
+        id: contract_outputs
+        if: always()
+        run: |
+          echo "plan_artifact_path=${{ inputs.tf_dir }}/tfplan" >> "$GITHUB_OUTPUT"
+
+          if [ "${{ inputs.apply }}" = "true" ]; then
+            echo "apply_executed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "apply_executed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          if [ "${{ inputs.apply }}" = "true" ] && [ "${{ inputs.destroy_on_complete }}" = "true" ]; then
+            echo "destroy_executed=true" >> "$GITHUB_OUTPUT"
+            if [ "${{ steps.terraform_destroy.conclusion }}" = "success" ]; then
+              echo "destroy_succeeded=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "destroy_succeeded=false" >> "$GITHUB_OUTPUT"
+            fi
+          else
+            echo "destroy_executed=false" >> "$GITHUB_OUTPUT"
+            echo "destroy_succeeded=skipped" >> "$GITHUB_OUTPUT"
+          fi

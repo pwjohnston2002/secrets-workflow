@@ -42,9 +42,12 @@ Scope: Applies to the Secrets Workflow repository. Keeps changes small, secure, 
 - Unit/Terratest (when present).
 - Teardown verification for ephemeral infra (see Teardown Guarantee).
 
-Relevant reusable workflows in this repo:
-- `.github/workflows/terraform-ephemeral.yml` (ephemeral Terraform)
-- `.github/workflows/security-scans.yml` (gitleaks/tfsec/checkov)
+Relevant workflows in this repo (current-state):
+- `.github/workflows/terraform-ephemeral.yml` (reusable ephemeral Terraform workflow)
+- `.github/workflows/validate-modules.yml` (module/example validation and teardown checks)
+
+Planned reusable security-scanning workflow:
+- `.github/workflows/security-scans.yml` (planned; implement before treating as an available reusable contract)
 
 ## Ephemeral Environments
 - Per-branch, isolated infra for validation.
