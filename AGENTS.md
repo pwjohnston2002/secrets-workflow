@@ -149,6 +149,54 @@ If such an action is required:
 - Disable tests or scanners just to force a pass.
 - Present aspirational workflow files as implemented if they are not present in the repo.
 
+## Branch Hygiene and Task Isolation
+
+Treat each independent repo change as a separate task branch and pull request.
+
+### Required workflow
+
+- Start every new task from the latest `main`.
+- Create a fresh branch from `origin/main` for each independent change.
+- Keep each branch scoped to one recommendation, fix, or tightly related change set.
+- Merge the PR to `main` before starting the next independent task.
+- After merge, delete the completed task branch before beginning the next task.
+
+### Never do
+
+- Never continue a new task on top of a previous task branch unless explicitly instructed.
+- Never mix multiple unrelated recommendations into one branch.
+- Never proceed if the current branch already contains unrelated changes.
+- Never open a PR whose diff includes work from earlier completed tasks.
+
+### Agent verification steps
+
+Before making changes for a new task, verify:
+
+1. the base branch is `main`
+2. the task branch was created from current `origin/main`
+3. the diff against `main` contains only the intended task scope
+
+If any of these checks fail, STOP and tell the user what is wrong before proceeding.
+
+### Pushback rule
+
+If the user asks for a new change but the current branch/worktree appears to contain unrelated work, the agent must pause and say so explicitly.
+
+The agent should instruct the user to:
+- merge or discard the existing work
+- return to current `main`
+- create a fresh branch for the next task
+
+Do not silently continue on a contaminated branch.
+
+### Review discipline
+
+Prefer one PR per independent change.
+Prefer small, reviewable diffs over bundled cleanup.
+If a task expands beyond its original scope, stop and ask whether to:
+- narrow the task, or
+- finish the current branch and create a follow-up branch
+
 ---
 
 ## 6) Coding & Repo Standards (High Signal Only)
