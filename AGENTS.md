@@ -153,12 +153,27 @@ If such an action is required:
 
 Treat each independent repo change as a separate task branch and pull request.
 
-### Required workflow
+### Base Branch and Task Isolation
 
-- Start every new task from the latest `origin/main` (not just a possibly stale local `main`).
-- Create a fresh branch from `origin/main` for each independent change.
+Identify the repository’s **authoritative base branch/ref** for the current environment.
+
+Preferred order of precedence:
+1. A fresh remote-tracking ref for the primary branch (e.g., `origin/main` or `origin/master`), if available.
+2. The local primary branch (e.g., `main` or `master`), ONLY if verified to be up-to-date with the remote or authoritative source.
+3. In managed environments (e.g., Codex, clean worktrees) where remotes are absent or removed after setup: treat the initial clean checkout as the authoritative base.
+
+Do not rely on a stale or ambiguous local branch if a better authoritative ref is available.
+Do not assume `origin/main` is always available.
+Do not assume `FETCH_HEAD` is a stable long-term reference.
+Do not silently branch from an arbitrary current `HEAD`.
+
+If the authoritative base is unclear, or the current diff contains unrelated changes, STOP and ask before proceeding.
+
+### Workflow Rules
+
+- Create a fresh branch from the authoritative base for each independent change.
 - Keep each branch scoped to one recommendation, fix, or tightly related change set.
-- Merge the PR to `main` before starting the next independent task.
+- Merge the PR to the repository’s authoritative primary branch before starting the next independent task.
 - After merge, delete the completed task branch before beginning the next task.
 
 ### Never do
@@ -170,17 +185,15 @@ Treat each independent repo change as a separate task branch and pull request.
 
 ### Agent verification steps
 
-Before making changes for a new task, run and verify the equivalent of:
+Before making changes for a new task, verify the equivalent of:
 
-- `git fetch origin --prune`
-- confirm `origin/main` exists
-- confirm the task branch is based on current `origin/main`
-- confirm `git diff --stat origin/main...HEAD` contains only the intended task scope
+- current workspace is clean
+- the task is based on the repo’s authoritative default branch/ref for this environment
+- the diff contains no unrelated prior work
 
-Do not rely only on local `main` if remote refs are missing or stale.
+If those checks cannot be satisfied clearly, stop and tell the user what is ambiguous.
+
 Do not create a new task branch from current `HEAD` unless the user explicitly instructs a stacked-branch workflow.
-
-If any of these checks fail, STOP and tell the user what is wrong before proceeding.
 
 ### Pushback rule
 
@@ -188,11 +201,11 @@ If the user asks for a new change but the current branch/worktree appears to con
 
 The agent should instruct the user to:
 - merge or discard the existing work
-- return to current `main`
+- return to the authoritative base
 - create a fresh branch for the next task
 
 Do not silently continue on a contaminated branch.
-If `origin/main` is unavailable, stale, or not the actual base of the current task branch, STOP and tell the user.
+If the authoritative base (including a valid managed clean checkout) is unavailable or ambiguous, or if the current branch is not based on it, STOP and tell the user.
 Do not silently continue by branching from the current `HEAD`.
 
 ### Contaminated Branch Recovery
@@ -201,18 +214,18 @@ If the current task branch contains unrelated files or prior-task changes:
 
 - Stop and do not continue editing on that branch.
 - Do not present the branch as ready for merge.
-- Create a fresh branch from current `origin/main`.
+- Create a fresh branch from the authoritative base.
 - Recover only the intended change by:
   - cherry-picking the intended commit, if isolated cleanly, or
   - copying only the intended file(s) into the fresh branch.
-- Re-verify the diff against `origin/main` before opening or updating a PR.
+- Re-verify the diff against the authoritative base before opening or updating a PR.
 
 ### Review discipline
 
 Prefer one PR per independent change.
 Prefer small, reviewable diffs over bundled cleanup.
 
-Before asking for PR review, verify that `git diff --stat origin/main...HEAD` includes only the files required for the current task.
+Before asking for PR review, verify that the diff against the authoritative base includes only the files required for the current task.
 If unrelated files appear, STOP and treat the branch as contaminated.
 
 If a task expands beyond its original scope, stop and ask whether to:
