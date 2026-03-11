@@ -167,7 +167,7 @@ If the `services.env` block cannot consume generated secrets directly, initializ
 * **Avoid uploading any Terraform state** or backend files as artifacts.
 * **Use default Terraform log level**, avoid `TF_LOG=TRACE` leaks.
 * **Pin container digests** instead of `:latest`.
-* **Enable `security-scans.yml`** (gitleaks, tfsec, checkov) for this branch.
+* **Planned workflow:** enable `.github/workflows/security-scans.yml` (gitleaks, tfsec, checkov) for this branch **after it is implemented**.
 * **Use pre-commit hooks** for `terraform validate` and `gitleaks`.
 
 ## 5. Implementation Summary
