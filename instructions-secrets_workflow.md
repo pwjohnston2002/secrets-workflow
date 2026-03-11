@@ -36,7 +36,7 @@ Use this as the entry point when scanning or reviewing the repo as a whole.
 | `docs/runbooks/`                            | Step-by-step guides (local dev, instance access)        | Onboarding and operational focus        |
 | `docs/policies/`                            | Formal policies for branching, releases, etc.           | Authoritative rules for contribution    |
 | `.github/workflows/terraform-ephemeral.yml` | Reusable CI workflow for ephemeral Terraform            | Published for consumption (`@v0.1.0`)   |
-| `.github/workflows/security-scans.yml`      | Reusable CI workflow for IaC + secret scanning          | Includes `gitleaks`, `tfsec`, `checkov` |
+| `.github/workflows/security-scans.yml`      | Planned reusable CI workflow for IaC + secret scanning (not yet implemented) | Intended to include `gitleaks`, `tfsec`, `checkov` |
 | `modules/`                                  | Minimal Terraform modules (OIDC roles, ephemeral MinIO) | Example-driven, portfolio-aligned       |
 
 ---

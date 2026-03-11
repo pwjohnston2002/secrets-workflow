@@ -76,13 +76,13 @@ This repository is a foundational dependency for the `workflow-toolbelt`. The in
 
 - **Reusable CI workflows to publish from this repo:**
   - `.github/workflows/terraform-ephemeral.yml` (reusable via `workflow_call`): OIDC auth, ephemeral MinIO state, `sops+age`, `fmt/validate/plan/apply/destroy` with teardown guarantees.
-  - `.github/workflows/security-scans.yml` (reusable): Runs `gitleaks`, and at least one IaC policy tool (`tfsec` and/or `checkov`).
+  - `.github/workflows/security-scans.yml` (planned reusable workflow; not yet implemented): Intended to run `gitleaks`, and at least one IaC policy tool (`tfsec` and/or `checkov`).
 - **Composite actions (optional but recommended):**
   - `actions/setup-sops-age`: Install and validate `sops` + `age`.
   - `actions/setup-minio`: Configure ephemeral S3-compatible backend service for Terraform with health checks.
 - **Thin wrappers in `workflow-toolbelt`:**
   - `.github/workflows/terraform.yml`: Calls this repo’s `terraform-ephemeral.yml` with project-specific inputs (e.g., `tf_dir`, `apply`, `destroy_on_complete`).
-  - `.github/workflows/security.yml`: Calls this repo’s `security-scans.yml`.
+  - `.github/workflows/security.yml`: Planned to call this repo’s `security-scans.yml` once implemented.
 - **Import pattern (example):**
   ```yaml
   jobs:
@@ -209,7 +209,7 @@ This repository is a foundational dependency for the `workflow-toolbelt`. The in
   - `applied` (bool): Whether apply executed.
   - `destroyed` (bool): Whether destroy executed.
 
-#### `.github/workflows/security-scans.yml`
+#### `.github/workflows/security-scans.yml` (planned; not yet implemented)
 - **Purpose:** Centralize security scans for consumers.
 - **Inputs:**
   - `paths` (string, optional): Path filter for scans.
@@ -231,7 +231,7 @@ This repository is a foundational dependency for the `workflow-toolbelt`. The in
     - **Architectural Decision Records (ADRs)** for key design choices.
 
 ### Deliverables Addendum (for Toolbelt Integration)
-- `.github/workflows/terraform-ephemeral.yml` and `.github/workflows/security-scans.yml` published and tagged (e.g., `v0.1.0`).
+- `.github/workflows/terraform-ephemeral.yml` and `.github/workflows/security-scans.yml` planned for publication and tagging (e.g., `v0.1.0`) once both workflows are implemented.
 - `actions/setup-sops-age` and `actions/setup-minio` composite actions (optional) to reduce duplication.
 - `examples/` demonstrating how to call reusable workflows and expected inputs/outputs.
 - Minimal `modules/` for IAM OIDC role(s) and ephemeral MinIO configuration with examples and sample policies.
@@ -281,7 +281,7 @@ This repository is a foundational dependency for the `workflow-toolbelt`. The in
 
 ## 9.5 Acceptance Criteria: Toolbelt Import Success
 - Toolbelt runs a thin `terraform.yml` wrapper that successfully calls `terraform-ephemeral.yml` against `tests/terraform/valid` with OIDC-backed auth and no static credentials.
-- Security workflow in toolbelt (`security.yml`) calls `security-scans.yml` and reports results (optionally SARIF).
+- Security workflow in toolbelt (`security.yml`) is planned to call `security-scans.yml` and report results (optionally SARIF) once available.
 - Runs create no persistent resources or state; MinIO/service state is ephemeral; `destroy_on_complete` defaults to true for PRs.
 - Toolbelt pins to a semver tag (e.g., `@v0.1.0`) for deterministic CI behavior.
 
@@ -300,7 +300,7 @@ This repository is a foundational dependency for the `workflow-toolbelt`. The in
 - Finalize the core ephemeral patterns (OIDC, MinIO-in-CI, sops+age).
 - Implement the following reusable CI workflows in this repo:
   - `.github/workflows/terraform-ephemeral.yml` (with inputs/outputs above).
-  - `.github/workflows/security-scans.yml`.
+  - `.github/workflows/security-scans.yml` (planned; not yet implemented).
 - (Optional) Implement composite actions:
   - `actions/setup-sops-age` and `actions/setup-minio`.
 - Add minimal `modules/` and `examples/` to prove OIDC + MinIO patterns.
