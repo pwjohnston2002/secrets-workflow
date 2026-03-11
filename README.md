@@ -1,6 +1,6 @@
 # secrets-workflow
 
-This is a foundational repository that establishes the principles, patterns, and reusable components for managing secrets and state in an **ephemeral, cloud-agnostic, and secure** manner across all portfolio projects.
+This is a foundational repository that establishes the principles, patterns, and reusable components for managing secrets and state in an **ephemeral, AWS-first, and secure** manner across portfolio projects.
 
 ## Core Philosophy
 
@@ -9,7 +9,7 @@ The core principle of this repository is **"no long-lived infrastructure."** We 
 This approach ensures:
 - **Zero Cost When Idle:** No cloud resources are left running after a CI/CD pipeline or local test completes.
 - **Enhanced Security:** We rely on short-lived credentials (via OIDC), in-repo encrypted files (`sops+age`), and managed, keyless instance access to further minimize the attack surface.
-- **Cloud-Agnosticism:** The patterns are designed to be portable across AWS, GCP, and Azure.
+- **AWS-First Today, Portable by Design:** The current implementation is centered on AWS workflows and modules, while patterns are documented to support future cross-cloud portability as equivalent implementations are added.
 - **Reproducibility:** Every environment is built from code and torn down completely, guaranteeing consistency.
 
 ## What This Repo Provides
