@@ -127,7 +127,7 @@ Do not substitute “similar” commands unless the repo actually uses them.
 - Cross-module refactors that materially change repo structure.
 - Changes that broaden this repo from reference capability into general application/infrastructure management.
 
-### � Dual Control Protocol
+### 🛑 Dual Control Protocol
 This protocol applies to high-blast-radius actions, including:
 - Destructive or irreversible Terraform operations (`apply`, `destroy`) against non-demo, non-ephemeral, or real AWS resources.
 - Deleting or mutating Terraform state, encrypted secret material, or access configuration in ways that could cause loss, lockout, or security regression.
@@ -140,7 +140,7 @@ If such an action is required:
 3. Request explicit human approval using this exact string: `APPROVE DESTRUCTIVE ACTION`.
 4. Wait for that exact string before proceeding.
 
-### �🚫 Never Do
+### 🚫 Never Do
 - Commit directly to the `main` branch.
 - Commit secrets, credentials, decrypted secret material, or long-lived access keys.
 - Normalize long-lived infrastructure for secrets or state.
@@ -155,7 +155,7 @@ Treat each independent repo change as a separate task branch and pull request.
 
 ### Required workflow
 
-- Start every new task from the latest `main`.
+- Start every new task from the latest `origin/main` (not just a possibly stale local `main`).
 - Create a fresh branch from `origin/main` for each independent change.
 - Keep each branch scoped to one recommendation, fix, or tightly related change set.
 - Merge the PR to `main` before starting the next independent task.
@@ -170,11 +170,15 @@ Treat each independent repo change as a separate task branch and pull request.
 
 ### Agent verification steps
 
-Before making changes for a new task, verify:
+Before making changes for a new task, run and verify the equivalent of:
 
-1. the base branch is `main`
-2. the task branch was created from current `origin/main`
-3. the diff against `main` contains only the intended task scope
+- `git fetch origin --prune`
+- confirm `origin/main` exists
+- confirm the task branch is based on current `origin/main`
+- confirm `git diff --stat origin/main...HEAD` contains only the intended task scope
+
+Do not rely only on local `main` if remote refs are missing or stale.
+Do not create a new task branch from current `HEAD` unless the user explicitly instructs a stacked-branch workflow.
 
 If any of these checks fail, STOP and tell the user what is wrong before proceeding.
 
@@ -188,11 +192,29 @@ The agent should instruct the user to:
 - create a fresh branch for the next task
 
 Do not silently continue on a contaminated branch.
+If `origin/main` is unavailable, stale, or not the actual base of the current task branch, STOP and tell the user.
+Do not silently continue by branching from the current `HEAD`.
+
+### Contaminated Branch Recovery
+
+If the current task branch contains unrelated files or prior-task changes:
+
+- Stop and do not continue editing on that branch.
+- Do not present the branch as ready for merge.
+- Create a fresh branch from current `origin/main`.
+- Recover only the intended change by:
+  - cherry-picking the intended commit, if isolated cleanly, or
+  - copying only the intended file(s) into the fresh branch.
+- Re-verify the diff against `origin/main` before opening or updating a PR.
 
 ### Review discipline
 
 Prefer one PR per independent change.
 Prefer small, reviewable diffs over bundled cleanup.
+
+Before asking for PR review, verify that `git diff --stat origin/main...HEAD` includes only the files required for the current task.
+If unrelated files appear, STOP and treat the branch as contaminated.
+
 If a task expands beyond its original scope, stop and ask whether to:
 - narrow the task, or
 - finish the current branch and create a follow-up branch
@@ -247,7 +269,7 @@ When making changes:
 - Explain why the change is required.
 - Update tests when behavior changes.
 - Update documentation if interfaces, workflows, safety gates, or repo structure change.
-- Update `project_tracker.md` when task ordering, scope, or completion state changes.
+- Update `project_tracker.md` when task ordering, scope, or completion state changes. Do not bundle tracker updates into unrelated implementation branches unless the tracker itself is part of the intended scope.
 
 If commands, structure, or workflow expectations change:
 - Update `AGENTS.md` in the same change set.
