@@ -1,6 +1,9 @@
-# Runbook: Ephemeral State Management (Hardened Edition)
+# Runbook: Ephemeral State Management
 
-This runbook explains the concept and implementation of **ephemeral state management for Terraform** within this project's CI/CD workflows, now with shift-left security and supply-chain hardening baked in.
+This runbook explains **ephemeral Terraform state management** in this repository and separates:
+
+- what is implemented today in `.github/workflows/terraform-ephemeral.yml`, and
+- stronger hardening guidance that is valuable but not yet fully implemented.
 
 ## 1. The Principle of Ephemeral State
 
@@ -20,9 +23,9 @@ By default, if no backend is configured, Terraform creates a `terraform.tfstate`
 * **Pros:** Zero configuration required.
 * **Cons:** In a CI environment, this is fragile. If the runner experiences an issue or if you need to inspect the state for debugging, accessing this file is difficult. It's an implicit dependency on the runner's transient filesystem.
 
-### Pattern 2: The MinIO-in-CI Backend (Robust, Isolated, and Secure)
+### Pattern 2: The MinIO-in-CI Backend (Current Project Pattern)
 
-This is the recommended and hardened pattern for ephemeral state. We run an S3-compatible object storage service (MinIO) as a container directly within the CI job.
+This is the current recommended pattern for ephemeral state in CI. We run an S3-compatible object storage service (MinIO) as a container directly within the workflow job.
 
 * **How it works:** The workflow starts a MinIO container as a `service`. Terraform is then configured to use this service as a standard S3 remote backend.
 * **Pros:**
@@ -31,13 +34,29 @@ This is the recommended and hardened pattern for ephemeral state. We run an S3-c
   * **Robustness:** It behaves like a true remote backend, providing better consistency than a local file.
   * **Zero Cost:** The MinIO container is created and destroyed with the CI job, incurring no persistent storage costs.
   * **Realistic Simulation:** It mimics the pattern of using a real S3 bucket for state, making CI a high-fidelity representation of production.
-  * **Security Hardened:** Per-run random credentials, no host port publishing, and pinned container digests.
+  * **Closer to remote-backend behavior than local state:** while still ephemeral to the workflow run.
+
+### Current Implementation Status (Reality Check)
+
+The reusable workflow at `.github/workflows/terraform-ephemeral.yml` currently implements:
+
+- MinIO service-backed state (`endpoint = "http://minio:9000"`).
+- A per-run bucket name (`tf-state-${{ github.run_id }}`).
+- Workflow-level `concurrency` to reduce parallel collision risk.
+- Conditional teardown (`terraform destroy`) when `apply=true` and `destroy_on_complete=true`.
+
+The same workflow currently **does not yet implement all hardening controls** described later in this runbook. Today it still uses:
+
+- static MinIO credentials (`minioadmin`),
+- `minio/minio:latest` rather than a pinned image digest,
+- host port publishing (`9000:9000`),
+- no explicit post-run local backend/state file scrubbing step.
 
 > **Note:** The S3 backend provides state locking only when used with DynamoDB. Because we run in a single job and do not provision DynamoDB, we serialize runs via a workflow `concurrency` group to avoid parallel state access.
 
-## 3. Hardened Workflow Pattern
+## 3. Target-State Hardening Guidance
 
-Below is the secure reference workflow pattern that embodies the hardened ephemeral state principle.
+The following pattern is **target-state guidance** for strengthening the current workflow. Treat it as a hardened reference pattern to adopt incrementally, not as a statement of current implementation parity.
 
 ### 1) Minimal Global Permissions + Concurrency Guard
 
@@ -158,7 +177,7 @@ If the `services.env` block cannot consume generated secrets directly, initializ
     mc admin user add ci "$USER" "$PASS"
 ```
 
-## 4. Security and Shift-Left Principles
+## 4. Target-State Security and Shift-Left Principles
 
 * **Pin all GitHub Actions by commit SHA** (use Dependabot to update SHAs).
 * **Set minimal permissions:** `contents: read` globally, elevate per-job only.
@@ -170,9 +189,11 @@ If the `services.env` block cannot consume generated secrets directly, initializ
 * **Planned workflow:** enable `.github/workflows/security-scans.yml` (gitleaks, tfsec, checkov) for this branch **after it is implemented**.
 * **Use pre-commit hooks** for `terraform validate` and `gitleaks`.
 
-## 5. Implementation Summary
+## 5. Summary: Current State vs Target State
 
-This hardened pattern ensures:
+Current workflow reality in this repo provides ephemeral-in-job MinIO-backed state and conditional teardown, but does not yet implement every control in the hardened reference.
+
+Target-state hardening aims to ensure:
 
 * Supply-chain integrity (pinned versions and images)
 * Scoped, per-run credentials
@@ -180,7 +201,7 @@ This hardened pattern ensures:
 * Serialized, isolated runs
 * Defense-in-depth cleanup
 
-Each workflow run creates its own MinIO backend, applies Terraform, tears it down, and wipes state—all without leaving a trace.
+As hardening work is implemented, update this runbook and `.github/workflows/terraform-ephemeral.yml` together so documented guarantees and actual behavior stay aligned.
 
 See also:
 
