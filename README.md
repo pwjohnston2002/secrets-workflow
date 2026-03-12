@@ -14,7 +14,7 @@ This approach ensures:
 
 ## What This Repo Provides
 
-- **Reusable GitHub Actions Workflows:** For ephemeral Terraform execution (`init/plan/apply/destroy`), security scanning, and more.
+- **Workflow Building Blocks (maturing contract surface):** Includes an implemented reusable Terraform workflow (`.github/workflows/terraform-ephemeral.yml`) that is available for internal/downstream evaluation, but is not yet declared part of the first stable consumer-facing contract surface.
 - **Reference Implementations:** Code examples for OIDC federation, MinIO-in-CI for state, and `sops+age` for secrets.
 - **Documentation & Runbooks:** Clear guides on principles, local development setup, and architectural decisions.
   - Local Development Setup: How to configure your local machine with `sops`, `age`, and `aws-vault`.
